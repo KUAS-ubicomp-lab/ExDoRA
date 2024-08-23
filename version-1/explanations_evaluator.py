@@ -1,30 +1,16 @@
-import os
-
-import pandas as pd
 import torch
 from bert_score import BERTScorer
 from rouge_score import rouge_scorer
 
 from bart_scorer import BARTScorer
-from exdora_utils import average_scores
-
-
-def load_expert_data():
-    expert_data = {}
-    for root, ds, fs in os.walk('expert_evaluation'):
-        for fn in fs:
-            data = pd.read_csv(os.path.join(root, fn))
-            texts = data['query'].to_list()
-            labels = data['gpt-3.5-turbo'].to_list()
-            expert_data[fn.split('.')[0]] = [texts, labels]
-    return expert_data
+from exdora_utils import average_scores, load_data
 
 
 def rouge_score(ranked_explanations):
     scorer = rouge_scorer.RougeScorer(['rouge1', 'rougeL'], use_stemmer=True)
     rouge_scores = []
     generated_texts = [i[0] for i in ranked_explanations]
-    reference_texts = list(load_expert_data().items())
+    reference_texts = list(load_data(source='expert_evaluation', text='query', label_1='gpt-3.5-turbo').items())
 
     for gen_text, ref_text in zip(generated_texts, reference_texts[0][1][1]):
         score = scorer.score(gen_text, ref_text)
@@ -45,7 +31,7 @@ def BART_score(ranked_explanations):
     scorer = BARTScorer(device='cuda' if torch.cuda.is_available() else 'cpu')
     bart_scores = []
     generated_texts = [i[0] for i in ranked_explanations]
-    reference_texts = list(load_expert_data().items())
+    reference_texts = list(load_data(source='expert_evaluation', text='query', label_1='gpt-3.5-turbo').items())
 
     for gen_text, ref_text in zip(generated_texts, reference_texts[0][1][1]):
         score = scorer.score(gen_text, ref_text)
@@ -61,7 +47,7 @@ def BERT_score(ranked_explanations):
     scorer = BERTScorer(model_type='bert-base-uncased', device='cuda' if torch.cuda.is_available() else 'cpu')
     bert_scores = []
     generated_texts = [i[0] for i in ranked_explanations]
-    reference_texts = list(load_expert_data().items())
+    reference_texts = list(load_data(source='expert_evaluation', text='query', label_1='gpt-3.5-turbo').items())
 
     for gen_text, ref_text in zip(generated_texts, reference_texts[0][1][1]):
         P, R, F1 = scorer.score([gen_text], [ref_text])

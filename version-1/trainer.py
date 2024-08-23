@@ -1,7 +1,6 @@
 import os
 
 import numpy as np
-import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -9,19 +8,9 @@ from sentence_transformers import SentenceTransformer, util
 from torch.utils.data import DataLoader, Dataset
 
 import explanations_generator
+from exdora_utils import load_data, load_dsm_criterion
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-
-
-def load_input_data():
-    input_data = {}
-    for root, ds, fs in os.walk('input_data'):
-        for fn in fs:
-            data = pd.read_csv(os.path.join(root, fn))
-            texts = data['text'].to_list()
-            labels = data['label'].to_list()
-            input_data[fn.split('.')[0]] = [texts, labels]
-    return input_data
 
 
 def extract_features(input_texts, in_context_demonstrations, explanations, dsm_criteria,
@@ -223,15 +212,9 @@ def main():
         "He was anxious about the upcoming exams and had trouble sleeping."
     ]
     top_k = 5
-    input_data_list = list(load_input_data().values())[0]
+    input_data_list = list(load_data(source='input_data', text='text', label_1='label', label_2='overall').values())[0]
     input_texts = [input_data_list[0][idx] for idx, input_data in enumerate(input_data_list[1]) if input_data == 1][:top_k]
-    dsm_criteria = [
-        "Persistent sad, anxious, or 'empty' mood",
-        "Feelings of hopelessness or pessimism",
-        "Irritability",
-        "Feelings of guilt, worthlessness, or helplessness",
-        "Loss of interest or pleasure in hobbies and activities"
-    ]
+    dsm_criteria = load_dsm_criterion()
     # Choose model: 'plm/Mistral-7B-Instruct-v0.2' or 'plm/gemma-7b-it'
     engine = os.path.join(current_dir, 'plm', 'Mistral-7B-Instruct-v0.2')
     explanations = explanations_generator.generate_explanations(input_texts, in_context_demonstrations, engine)
