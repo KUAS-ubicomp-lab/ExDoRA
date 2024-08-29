@@ -216,7 +216,7 @@ def main():
     input_texts = [input_data_list[0][idx] for idx, input_data in enumerate(input_data_list[1]) if input_data == 1][:top_k]
     dsm_criteria = load_dsm_criterion()
     # Choose model: 'plm/Mistral-7B-Instruct-v0.2' or 'plm/gemma-7b-it'
-    engine = os.path.join(current_dir, 'plm', 'Mistral-7B-Instruct-v0.2')
+    engine = os.path.join(current_dir, 'plm', 'gemma-7b-it')
     explanations = explanations_generator.generate_explanations(input_texts, in_context_demonstrations, engine)
     relevance_scores = [0.9, 0.7, 0.85]
 
