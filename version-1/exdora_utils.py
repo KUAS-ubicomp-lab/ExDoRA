@@ -34,6 +34,17 @@ def load_data(source, text, label_1, label_2=None):
     return expert_data
 
 
+def extract_section(text, section_name):
+    start_index = text.find(section_name)
+    if start_index == -1:
+        return "Section not found."
+    end_index = text.find(":", start_index + len(section_name))
+    if end_index == -1:
+        return text[start_index:].strip()
+    subsection = text[start_index:end_index].strip()
+    return subsection
+
+
 def average_scores(scores):
     avg_score = sum(scores) / len(scores)
     return avg_score

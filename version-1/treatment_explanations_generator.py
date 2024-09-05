@@ -2,7 +2,7 @@ import os
 
 import torch
 
-from exdora_utils import load_model_and_tokenizer
+from exdora_utils import load_model_and_tokenizer, load_data, extract_section
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -44,17 +44,9 @@ def main():
     Explanation: Trazodone is commonly used for insomnia and can help with anxiety, making it a suitable adjunct to the patient's current regimen.
     """
 
-    clinical_note = """
-    Patient History: 45-year-old male with a history of major depressive disorder (MDD),
-    presenting with fatigue, insomnia, and loss of interest. Previous treatment included SSRIs 
-    and psychotherapy with partial response.
-    Current Medications: Sertraline 50 mg daily.
-    Clinical Notes: Patient reports mild improvement in mood but still experiences significant
-    anxiety and persistent insomnia. Recent lab tests show normal thyroid function and no 
-    electrolyte abnormalities.
-    Diagnoses: Major Depressive Disorder (MDD), Generalized Anxiety Disorder (GAD), Insomnia.
-    """
-    treatment_explanations = generate_treatment_explanations(clinical_note, in_context_demonstrations, max_length=600)
+    input_data_list = list(load_data(source='input_data', text='HADM_ID', label_1='CATEGORY', label_2='TEXT').values())[0]
+    clinical_note = extract_section(text=input_data_list[2][1], section_name="HISTORY OF PRESENT ILLNESS:")
+    treatment_explanations = generate_treatment_explanations(clinical_note, in_context_demonstrations, max_length=5000)
     print("Treatment Explanations:\n", treatment_explanations)
 
 
