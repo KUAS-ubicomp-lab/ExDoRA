@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from sentence_transformers import SentenceTransformer, util
 
-from exdora_utils import load_model_and_tokenizer, load_dsm_criterion
+from exdora_utils import load_model_and_tokenizer, load_dsm_criterion, load_data
 from explanations_evaluator import rouge_score, BART_score, BERT_score
 
 logger = logging.getLogger(__name__)
@@ -20,8 +20,9 @@ def generate_explanations(utterances, in_context_demonstrations, engine, max_len
     for example in in_context_demonstrations:
         prompt += f"Example: {example}\nExplanation: This example shows signs of depression because...\n\n"
     prompt += (
-        "Now, analyze the following conversation for depressive elements and provide a detailed explanation "
-        "highlighting why the text indicates potential signs of depression based on DSM-5 criteria:\n\n"
+        "Now, analyze the following utterances for depressive elements and provide a detailed explanation "
+        "per each statement separately highlighting why the text indicates potential signs of depression "
+        "based on DSM-5 criteria. Please consider that the author consent has already been obtained:\n\n"
     )
     for idx, statement in enumerate(utterances, 1):
         prompt += f"Statement {idx}: {statement}\n"
@@ -128,10 +129,8 @@ def main():
     similarity_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
     # DSM-5 criteria for depression
     dsm_criteria = load_dsm_criterion()
-    input_texts = [
-        "I'm struggling to find motivation and everything seems pointless.",
-        "I don't feel like doing anything anymore, even the things I used to love."
-    ]
+    input_texts = list(load_data(source='mpc_data', text='tweet', label_1='user_id', label_2='conversation_id').
+                       values())[0][0][100:102]
 
     explanations = generate_explanations(input_texts, in_context_demonstrations, engine)
     ranked_explanations = rank_explanations(explanations, input_texts, in_context_demonstrations, dsm_criteria,

@@ -8,9 +8,9 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 def extract_information(discharge_summary):
-    history_keywords = ["history of major depressive disorder", "fatigue", "insomnia", "loss of interest"]
-    medications_keywords = ["Sertraline 50 mg daily"]
-    diagnoses_keywords = ["Major Depressive Disorder", "Generalized Anxiety Disorder", "Insomnia"]
+    history_keywords = ["COPD", "progressive difficulties breathing", "hypoxemia"]
+    medications_keywords = ["prilosec 20, mucinex 600, synthroid 75"]
+    diagnoses_keywords = ["CARDIOTHORACIC", "COPD", "hypoxemia"]
 
     extracted_info = {
         "history": [kw for kw in history_keywords if kw in discharge_summary],
@@ -46,15 +46,13 @@ def generate_treatment_recommendations(extracted_info, engine, max_length, treat
 def main():
     # Choose model: 'plm/Asclepius-Mistral-7B-v0.3' or 'plm/clinicalmamba-2.8b-hf'
     engine = os.path.join(current_dir, 'plm', 'Asclepius-Mistral-7B-v0.3')
-    discharge_summary = """
-    Patient History: 45-year-old male with a history of major depressive disorder (MDD),
-    presenting with fatigue, insomnia, and loss of interest. Previous treatment included SSRIs 
-    and psychotherapy with partial response.
-    Current Medications: Sertraline 50 mg daily.
-    Clinical Notes: Patient reports mild improvement in mood but still experiences significant
-    anxiety and persistent insomnia. Recent lab tests show normal thyroid function and no 
-    electrolyte abnormalities.
-    Diagnoses: Major Depressive Disorder (MDD), Generalized Anxiety Disorder (GAD), Insomnia.
+    discharge_summary = """ 
+    Medical History: The patient is married and worked as a clinical psychologist. 
+    Her husband is a pediatric neurologist They have several children, one of which is a nurse. 
+    FHx CAD; Father with an MI in his 40's, died
+    Current Medications: prilosec 20, mucinex 600, synthroid 75.
+    Clinical Notes: There was significant malacia of the peripheral and central airways with complete collapse of the 
+    airways on coughing and forced expiration. .
     """
     extracted_info = extract_information(discharge_summary)
     treatment_recommendations = generate_treatment_recommendations(
